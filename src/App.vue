@@ -1,17 +1,48 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import { computed, onMounted, ref, watch } from "vue";
+import HelloWorld from "./components/HelloWorld.vue";
+import { useStore } from "vuex";
+
+const store = useStore();
+
+const todo = ref("");
+
+const handleAddTodo = () => {
+  const payload = {
+    title: todo.value,
+  };
+  store.dispatch("todoModule/addTodo", payload);
+  todo.value = "";
+};
+
+const handleDelete = (id: number) => {
+  store.dispatch("todoModule/deleteTodo", id);
+};
+
+onMounted(() => {
+  store.dispatch("todoModule/getTodo");
+});
+
+const todoList = computed(() => store.getters["todoModule/allTodo"]);
+
+// watch(todoList, (val) => {
+//   console.log("Todos updated:", val);
+// });
 </script>
 
 <template>
   <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <input v-model="todo" />
+    <button @click="handleAddTodo">Input</button>
+    <ul>
+      <li v-for="todo in todoList">
+        <p>
+          {{ todo.title }}
+        </p>
+        <button @click="handleDelete(todo.id)">Delete</button>
+      </li>
+    </ul>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
 <style scoped>
